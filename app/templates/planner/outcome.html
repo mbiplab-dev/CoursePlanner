@@ -1,0 +1,324 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Plan Outcome - IITM BS Course Planner{% endblock %}
+
+{% block content %}
+<!-- Success Header -->
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card shadow-lg border-0" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+            <div class="card-body text-center p-5">
+                <i class="fas fa-check-circle fa-4x mb-3"></i>
+                <h1 class="fw-bold mb-3">Your 3-Term Plan is Complete!</h1>
+                <p class="lead mb-0">Review your academic progression and remaining courses below</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Summary Statistics -->
+<div class="row mb-4">
+    <div class="col-md-3 col-sm-6 mb-3">
+        <div class="card shadow-sm h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-coins fa-2x mb-2" style="color: var(--iitm-primary);"></i>
+                <h6 class="text-muted">Current Credits</h6>
+                <h3 class="fw-bold mb-0">{{ total_existing }}</h3>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 col-sm-6 mb-3">
+        <div class="card shadow-sm h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-plus-circle fa-2x mb-2 text-success"></i>
+                <h6 class="text-muted">Planned Credits</h6>
+                <h3 class="fw-bold mb-0 text-success">+{{ total_planned }}</h3>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 col-sm-6 mb-3">
+        <div class="card shadow-sm h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-calculator fa-2x mb-2 text-primary"></i>
+                <h6 class="text-muted">Total After Plan</h6>
+                <h3 class="fw-bold mb-0 text-primary">{{ total_after_plan }}</h3>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 col-sm-6 mb-3">
+        <div class="card shadow-sm h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-trophy fa-2x mb-2 text-warning"></i>
+                <h6 class="text-muted">New Level</h6>
+                <h3 class="fw-bold mb-0 text-warning">{{ new_level }}</h3>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Academic Progress -->
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card shadow-sm">
+            <div class="card-header" style="background: linear-gradient(90deg, var(--iitm-primary) 0%, var(--iitm-secondary) 100%); color: white;">
+                <h5 class="mb-0">
+                    <i class="fas fa-chart-line me-2"></i>Academic Progress Overview
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-12 mb-3">
+                        <h6>Overall Progress to Degree (48 credits required)</h6>
+                        <div class="progress" style="height: 30px;">
+                            <div class="progress-bar bg-secondary" role="progressbar" 
+                                 style="width: {{ (total_existing / 48 * 100)|round|int }}%;">
+                                Current: {{ total_existing }}
+                            </div>
+                            <div class="progress-bar bg-success" role="progressbar" 
+                                 style="width: {{ (total_planned / 48 * 100)|round|int }}%;">
+                                Planned: +{{ total_planned }}
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-between mt-2">
+                            <small class="text-muted">0 credits</small>
+                            <small class="fw-bold">{{ total_after_plan }} / 48 credits ({{ ((total_after_plan / 48) * 100)|round|int }}%)</small>
+                            <small class="text-muted">48 credits</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Completed Courses -->
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card shadow-sm">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-check-double me-2"></i>Completed Courses
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover table-completed mb-0">
+                        <thead>
+                            <tr>
+                                <th width="15%">Course Code</th>
+                                <th>Course Name</th>
+                                <th width="12%">Credits</th>
+                                <th width="12%">Grade</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for course in student.completed_courses %}
+                            <tr>
+                                <td><span class="badge badge-custom" style="background-color: var(--success-green);">{{ course.code }}</span></td>
+                                <td>{{ course.name }}</td>
+                                <td>{{ course.credits }}</td>
+                                <td><span class="badge bg-success">{{ course.grade }}</span></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Planned Courses by Term -->
+<div class="row mb-4">
+    <div class="col-md-4 mb-3">
+        <div class="card shadow-sm h-100">
+            <div class="card-header" style="background-color: #0d6efd; color: white;">
+                <h6 class="mb-0">
+                    <i class="fas fa-calendar-alt me-2"></i>Term 1 Plan ({{ term1_credits }} credits)
+                </h6>
+            </div>
+            <div class="card-body">
+                {% if term1_courses %}
+                <ul class="list-group list-group-flush">
+                    {% for course in term1_courses %}
+                    <li class="list-group-item px-0">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <span class="badge badge-custom mb-1" style="background-color: #0d6efd; display: block;">{{ course.code }}</span>
+                                <small>{{ course.name }}</small>
+                            </div>
+                            <span class="badge bg-secondary">{{ course.credits }}</span>
+                        </div>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <p class="text-muted text-center py-3">No courses selected</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4 mb-3">
+        <div class="card shadow-sm h-100">
+            <div class="card-header" style="background-color: #6610f2; color: white;">
+                <h6 class="mb-0">
+                    <i class="fas fa-calendar-alt me-2"></i>Term 2 Plan ({{ term2_credits }} credits)
+                </h6>
+            </div>
+            <div class="card-body">
+                {% if term2_courses %}
+                <ul class="list-group list-group-flush">
+                    {% for course in term2_courses %}
+                    <li class="list-group-item px-0">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <span class="badge badge-custom mb-1" style="background-color: #6610f2; display: block;">{{ course.code }}</span>
+                                <small>{{ course.name }}</small>
+                            </div>
+                            <span class="badge bg-secondary">{{ course.credits }}</span>
+                        </div>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <p class="text-muted text-center py-3">No courses selected</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4 mb-3">
+        <div class="card shadow-sm h-100">
+            <div class="card-header" style="background-color: #d63384; color: white;">
+                <h6 class="mb-0">
+                    <i class="fas fa-calendar-alt me-2"></i>Term 3 Plan ({{ term3_credits }} credits)
+                </h6>
+            </div>
+            <div class="card-body">
+                {% if term3_courses %}
+                <ul class="list-group list-group-flush">
+                    {% for course in term3_courses %}
+                    <li class="list-group-item px-0">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <span class="badge badge-custom mb-1" style="background-color: #d63384; display: block;">{{ course.code }}</span>
+                                <small>{{ course.name }}</small>
+                            </div>
+                            <span class="badge bg-secondary">{{ course.credits }}</span>
+                        </div>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <p class="text-muted text-center py-3">No courses selected</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Remaining Courses -->
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card shadow-sm">
+            <div class="card-header bg-warning text-dark">
+                <h5 class="mb-0">
+                    <i class="fas fa-list-ul me-2"></i>Remaining Courses to Complete Program
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if remaining_courses %}
+                <div class="alert alert-info mb-3">
+                    <i class="fas fa-info-circle me-2"></i>
+                    <strong>{{ remaining_courses|length }} courses remaining.</strong> These courses will be available in future terms based on prerequisites.
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover table-remaining mb-0">
+                        <thead>
+                            <tr>
+                                <th width="15%">Course Code</th>
+                                <th>Course Name</th>
+                                <th width="12%">Credits</th>
+                                <th width="15%">Difficulty</th>
+                                <th width="25%">Prerequisites</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for course in remaining_courses %}
+                            <tr>
+                                <td><span class="badge badge-custom" style="background-color: var(--warning-orange);">{{ course.code }}</span></td>
+                                <td>{{ course.name }}</td>
+                                <td>{{ course.credits }}</td>
+                                <td>
+                                    <span class="badge 
+                                        {% if course.difficulty == 'Easy' %}bg-success
+                                        {% elif course.difficulty == 'Medium' %}bg-warning text-dark
+                                        {% elif course.difficulty == 'Hard' %}bg-danger
+                                        {% else %}bg-dark{% endif %}">
+                                        {{ course.difficulty }}
+                                    </span>
+                                </td>
+                                <td>
+                                    {% if course.prerequisites %}
+                                        {% for prereq in course.prerequisites %}
+                                            <span class="badge bg-secondary">{{ prereq }}</span>
+                                        {% endfor %}
+                                    {% else %}
+                                        <span class="text-muted">None</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="alert alert-success text-center py-4">
+                    <i class="fas fa-trophy fa-3x mb-3 d-block"></i>
+                    <h4 class="fw-bold">Congratulations!</h4>
+                    <p class="mb-0">You've planned all available courses. You're on track to complete your program!</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Action Buttons -->
+<div class="row">
+    <div class="col-md-12">
+        <div class="card shadow-sm">
+            <div class="card-body text-center p-4">
+                <h5 class="mb-3">What would you like to do next?</h5>
+                <div class="d-flex justify-content-center flex-wrap gap-2">
+                    <a href="{{ url_for('planner.term1') }}" class="btn btn-outline-primary">
+                        <i class="fas fa-edit me-2"></i>Modify Plan
+                    </a>
+                    <button class="btn btn-primary" onclick="window.print()">
+                        <i class="fas fa-print me-2"></i>Print Plan
+                    </button>
+                    <a href="{{ url_for('dashboard.dashboard_home') }}" class="btn btn-success">
+                        <i class="fas fa-home me-2"></i>Back to Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    @media print {
+        .navbar, .btn, .card-header { 
+            print-color-adjust: exact;
+            -webkit-print-color-adjust: exact;
+        }
+    }
+</style>
+{% endblock %}
