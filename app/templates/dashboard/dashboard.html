@@ -1,0 +1,27 @@
+{% extends "layouts/base.html" %}
+{% block content %}
+
+<h3 class="fw-bold mb-3">Dashboard</h3>
+
+<div class="card shadow p-3">
+    <h5 class="mb-2">Welcome Student 👋</h5>
+    <p>Your current academic progress:</p>
+
+    <div class="row">
+        <div class="col-md-4 mt-3">
+            <div class="p-3 bg-success text-white rounded text-center">
+                <h6>Credits Earned</h6>
+                <h2>{{ credits }}</h2>
+            </div>
+        </div>
+
+        <div class="col-md-4 mt-3">
+            <div class="p-3 bg-info text-white rounded text-center">
+                <h6>Level Completed</h6>
+                <h2>{{ level }}</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
